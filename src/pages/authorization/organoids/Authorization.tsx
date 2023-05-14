@@ -1,50 +1,73 @@
+import '../styles/Authorization.css';
 import { useEffect, useState } from 'react';
 import useWebSocketQr from '../logics/useWebSocketQr';
-import '../styles/Authorization.css'
-import { $apiTokenInstance, $authorization, $check, $idInstance, setApiTokenInstance, setCheck, setIdInstance } from '../../../common/function/stores';
+import { $apiTokenInstance, $authorization, $idInstance, setApiTokenInstance, setAuthorization, setIdInstance } from '../../../common/function/stores';
 import { useStore } from 'effector-react';
+import { InLogout } from '../logics/InLogout';
 
 export const Authorization = () => {
     const apiTokenInstance = useStore($apiTokenInstance);
     const idInstance = useStore($idInstance);
-    const check = useStore($check);
     const authorization = useStore($authorization);
-    const [qr,setQR] = useState<any | null>(null)
-    const { messages, sendMessage, disconnect } = useWebSocketQr();
-    const handleClick = async () => {
-        if (!check) {
-            try {
-                setCheck(!check)
-            } catch (error) {
-                console.log(error)
+
+    const [qr, setQR] = useState<any | null>(null);
+    const [check, setCheck] = useState<boolean>(false);
+
+    const { messages } = useWebSocketQr({ check });
+
+    const establishSocketConnection = () => {
+        setCheck(prevCheck => !prevCheck);
+    };
+
+    const logout = async () => {
+        try {
+            const result = await InLogout({ idInstance, apiTokenInstance });
+            if (result) {
+                setAuthorization(false);
             }
-        } else {
-            setCheck(!check)
+        } catch (error) {
+            console.log(error);
         }
     };
+
     useEffect(() => {
-        console.log("messages", messages)
-        // if(JSON.parse(messages[messages.length - 1]).message == "Instance already logged"){
+        if (messages && messages.length) {
+            const result = JSON.parse(messages[messages.length - 1]).message;
+            if (result === "Instance already logged") {
+                setAuthorization(true);
+                setQR(null);
+            } else {
+                setAuthorization(false);
+                setQR(result);
+            }
+        }
+    }, [messages]);
 
-        // }
-    }, [messages])
+    const handleIdInstanceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setIdInstance(event.target.value);
+    };
 
+    const handleApiTokenInstanceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setApiTokenInstance(event.target.value);
+    };
 
-
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        establishSocketConnection();
+    };
 
     return (
         <div className="Authorization">
-            <form onSubmit={e => { e.preventDefault(); handleClick(); }}>
-                <input required type="text" placeholder="IdInstance" value={idInstance} onChange={(event: any) => { setIdInstance(event.target.value) }} />
-                <input required type="text" placeholder="ApiTokenInstance" value={apiTokenInstance} onChange={(event: any) => { setApiTokenInstance(event.target.value) }} />
-                <input type="submit" value={!check ? "connect" : "close"} />
+            <form onSubmit={handleSubmit}>
+                <input required type="text" placeholder="IdInstance" value={idInstance} onChange={handleIdInstanceChange} />
+                <input required type="text" placeholder="ApiTokenInstance" value={apiTokenInstance} onChange={handleApiTokenInstanceChange} />
+                {!authorization ? (
+                    <input type="submit" value={check ? "authorization process" : "authorization attempt"} />
+                ) : (
+                    <button onClick={logout}>log out</button>
+                )}
             </form>
-            {
-                check && messages && messages.length &&
-                <>
-                    <img src={`data:image/png;base64, ${JSON.parse(messages[messages.length - 1]).message}`} alt="QR code" />
-                </>
-            }
+            {qr && <img src={`data:image/png;base64, ${qr}`} alt="QR code" />}
         </div>
     );
 };

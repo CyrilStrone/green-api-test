@@ -1,25 +1,16 @@
 import './App.css'
-import { Route, Routes } from 'react-router-dom'
-import { $accessToken } from './common/function/accessToken';
 import { useStore } from 'effector-react';
 import { Authorization } from './pages/authorization/organoids/Authorization';
 import { Chat } from './pages/chat/organoids/Chat';
+import { $authorization } from './common/function/stores';
 
 function App() {
-  const accessToken = useStore($accessToken);
-
+  const authorization = useStore($authorization);
   return (
     <div className="App">
       <div className="App__Actual">
-        <Routes>
-          {accessToken ?
-            <>
-              <Route path="/" element={<Chat />} />
-            </> :
-            <>
-              <Route path="/" element={<Authorization />} />
-            </>}
-        </Routes>
+        <Authorization />
+        {authorization && <Chat />}
       </div>
     </div>
   )

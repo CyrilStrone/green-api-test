@@ -3,28 +3,28 @@ import { w3cwebsocket as WebSocket } from 'websocket';
 import { $apiTokenInstance, $check, $idInstance } from '../../../common/function/stores';
 import { useStore } from 'effector-react';
 
-type WebSocketState = {
+interface WebSocketState  {
   messages: string[];
   sendMessage: (message: string) => void;
   disconnect: () => void;
-};
+}
 
-const useWebSocketQr = (): WebSocketState => {
+const useWebSocketQr = (params:{check:boolean}): WebSocketState => {
   const apiTokenInstance = useStore($apiTokenInstance);
   const idInstance = useStore($idInstance);
-  const check = useStore($check);
+  
   const [client, setClient] = useState<WebSocket>();
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    if (check && apiTokenInstance && idInstance) {
+    if (params.check && apiTokenInstance && idInstance) {
       const newClient = new WebSocket(`wss://api.green-api.com/waInstance${idInstance}/scanqrcode/${apiTokenInstance}`);
       setClient(newClient);
       return () => {
         newClient.close();
       };
     }
-  }, [apiTokenInstance, idInstance, check]);
+  }, [apiTokenInstance, idInstance, params.check]);
 
   useEffect(() => {
     if (!client) {

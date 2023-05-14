@@ -4,12 +4,12 @@ export const $chatStore= createStore<any | null>(null)
 export const setChatStore = createEvent<any | null>()
 $chatStore.on(setChatStore, (_,val)=> val);
 
-export const $apiTokenInstance= createStore<any | null>(null)  
-export const setApiTokenInstance = createEvent<any | null>()
+export const $apiTokenInstance= createStore<string>("")  
+export const setApiTokenInstance = createEvent<string>()
 $apiTokenInstance.on(setApiTokenInstance, (_,val)=> val);
 
-export const $idInstance = createStore<any | null>(null)  
-export const setIdInstance = createEvent<any | null>()
+export const $idInstance = createStore<string>("")  
+export const setIdInstance = createEvent<string>()
 $idInstance.on(setIdInstance, (_,val)=> val);
 
 export const $check = createStore<boolean>(false)  
