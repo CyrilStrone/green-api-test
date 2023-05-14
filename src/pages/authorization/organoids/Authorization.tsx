@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import useWebSocketQr from '../logics/useWebSocketQr';
 import '../styles/Authorization.css'
-import { $apiTokenInstance, $check, $idInstance, setApiTokenInstance, setCheck, setIdInstance } from '../../../common/function/stores';
+import { $apiTokenInstance, $authorization, $check, $idInstance, setApiTokenInstance, setCheck, setIdInstance } from '../../../common/function/stores';
 import { useStore } from 'effector-react';
 
 export const Authorization = () => {
     const apiTokenInstance = useStore($apiTokenInstance);
     const idInstance = useStore($idInstance);
     const check = useStore($check);
-
+    const authorization = useStore($authorization);
+    const [qr,setQR] = useState<any | null>(null)
     const { messages, sendMessage, disconnect } = useWebSocketQr();
     const handleClick = async () => {
         if (!check) {
@@ -18,12 +19,14 @@ export const Authorization = () => {
                 console.log(error)
             }
         } else {
-            disconnect()
             setCheck(!check)
         }
     };
     useEffect(() => {
         console.log("messages", messages)
+        // if(JSON.parse(messages[messages.length - 1]).message == "Instance already logged"){
+
+        // }
     }, [messages])
 
 

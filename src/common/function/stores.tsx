@@ -16,3 +16,7 @@ export const $check = createStore<boolean>(false)
 export const setCheck = createEvent<boolean>()
 $check.on(setCheck, (_,val)=> val);
 
+export const $authorization = createStore<boolean>(false)  
+export const setAuthorization = createEvent<boolean>()
+$authorization.on(setAuthorization, (_,val)=> val);
+
